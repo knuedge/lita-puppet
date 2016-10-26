@@ -35,7 +35,13 @@ module Lita
         ret = nil
 
         # TODO: better error handling
-        puppet_master = Rye::Box.new(config.master_hostname, user: user, password_prompt: false)
+        puppet_master = Rye::Box.new(
+          config.master_hostname,
+          user: user,
+          auth_methods: ["publickey"],
+          password_prompt: false
+        )
+
         begin
           Timeout::timeout(600) do
             puppet_master.cd control_repo
@@ -79,7 +85,13 @@ module Lita
         exception = nil
 
         # TODO: better error handling
-        remote = Rye::Box.new(host, user: user, password_prompt: false)
+        remote = Rye::Box.new(
+          host,
+          user: user,
+          auth_methods: ["publickey"],
+          password_prompt: false
+        )
+
         begin
           Timeout::timeout(300) do
             remote.cd '/tmp'
