@@ -19,21 +19,23 @@ module Lita
         environment = response.matches[0][4]
         control_repo = config.control_repo_path || '/opt/puppet/control'
 
-        puppet_master = Rye::Box.new(host, user: user)
-        puppet_master.cd control_repo
+        Timeout::timeout(600) do
+          puppet_master = Rye::Box.new(host, user: user)
+          puppet_master.cd control_repo
 
-        # Need to use sudo from here on
-        puppet_master.enable_sudo
+          # Need to use sudo from here on
+          puppet_master.enable_sudo
 
-        puppet_master.git :pull
+          puppet_master.git :pull
 
-        # scary...
-        puppet_master.disable_safe_mode
-        command = "r10k deploy environment"
-        command << " #{environment}" if environment
-        command << ' -pv'
-        ret = puppet_master.execute command
-        puppet_master.disconnect
+          # scary...
+          puppet_master.disable_safe_mode
+          command = "r10k deploy environment"
+          command << " #{environment}" if environment
+          command << ' -pv'
+          ret = puppet_master.execute command
+          puppet_master.disconnect
+        end
 
         # build a reply
         reply_text = "Here's what happened:\n"
