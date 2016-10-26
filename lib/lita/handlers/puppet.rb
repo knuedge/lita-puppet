@@ -34,6 +34,8 @@ module Lita
 
         ret = nil
 
+        # TODO: better error handling
+
         Timeout::timeout(600) do
           puppet_master = Rye::Box.new(config.master_hostname, user: user)
           puppet_master.cd control_repo
@@ -70,6 +72,8 @@ module Lita
 
         ret = nil
 
+        # TODO: better error handling
+
         Timeout::timeout(300) do
           remote = Rye::Box.new(host, user: user)
           remote.cd '/tmp'
@@ -80,13 +84,21 @@ module Lita
           # scary...
           remote.disable_safe_mode
 
-          ret = remote.execute 'puppet agent -t'
+          # build up the command
+          command = 'puppet agent'
+          command << ' --verbose --no-daemonize'
+          command << ' --no-usecacheonfailure'
+          command << ' --no-splay --show_diff'
+
+          ret = remote.execute command
           remote.disconnect
         end
 
         # build a reply
         if ret
           response.reply "#{username}, that puppet run is complete! It exited with status #{ret.exit_status}."
+          # Send the standard out, but strip off the bash color code stuff...
+          response.reply "/code " + ret.stdout.join("\n").gsub(/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]/, '')
         else
           response.reply "#{username}, your puppet run is done, but didn't seem to work... I think it may have timed out."
         end
