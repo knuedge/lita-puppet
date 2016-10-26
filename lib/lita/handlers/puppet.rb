@@ -38,7 +38,6 @@ module Lita
         puppet_master = Rye::Box.new(
           config.master_hostname,
           user: user,
-          auth_methods: ["publickey"],
           password_prompt: false
         )
 
@@ -88,7 +87,6 @@ module Lita
         remote = Rye::Box.new(
           host,
           user: user,
-          auth_methods: ["publickey"],
           password_prompt: false
         )
 
