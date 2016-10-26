@@ -35,31 +35,36 @@ module Lita
         ret = nil
 
         # TODO: better error handling
+        puppet_master = Rye::Box.new(config.master_hostname, user: user, password_prompt: false)
+        begin
+          Timeout::timeout(600) do
+            puppet_master.cd control_repo
 
-        Timeout::timeout(600) do
-          puppet_master = Rye::Box.new(config.master_hostname, user: user)
-          puppet_master.cd control_repo
+            # Need to use sudo from here on
+            puppet_master.enable_sudo
 
-          # Need to use sudo from here on
-          puppet_master.enable_sudo
+            puppet_master.git :pull
 
-          puppet_master.git :pull
-
-          # scary...
-          puppet_master.disable_safe_mode
-          command = "r10k deploy environment"
-          command << " #{environment}" if environment
-          command << ' -pv'
-          ret = puppet_master.execute command
+            # scary...
+            puppet_master.disable_safe_mode
+            command = "r10k deploy environment"
+            command << " #{environment}" if environment
+            command << ' -pv'
+            ret = puppet_master.execute command
+          end
+        rescue Exception => e
+          exception = e
+        ensure
           puppet_master.disconnect
         end
 
         # build a reply
-        response.reply("#{username}, your r10k deployment is done!")
         if ret
+          response.reply("#{username}, your r10k deployment is done!")
           response.reply "/code " + ret.stderr.join("\n")
         else
-          response.reply "But didn't seem to work... I think it may have timed out."
+          response.reply "#{username}, your r10k run didn't seem to work... I think it may have timed out."
+          response.reply "/code " + exception.message
         end
       end
 
@@ -71,26 +76,31 @@ module Lita
         response.reply("#{username}, I'll run puppet right away. Give me a sec and I'll let you know how it goes.")
 
         ret = nil
+        exception = nil
 
         # TODO: better error handling
+        remote = Rye::Box.new(host, user: user, password_prompt: false)
+        begin
+          Timeout::timeout(300) do
+            remote.cd '/tmp'
 
-        Timeout::timeout(300) do
-          remote = Rye::Box.new(host, user: user)
-          remote.cd '/tmp'
+            # Need to use sudo from here on
+            remote.enable_sudo
 
-          # Need to use sudo from here on
-          remote.enable_sudo
+            # scary...
+            remote.disable_safe_mode
 
-          # scary...
-          remote.disable_safe_mode
+            # build up the command
+            command = 'puppet agent'
+            command << ' --verbose --no-daemonize'
+            command << ' --no-usecacheonfailure'
+            command << ' --no-splay --show_diff'
 
-          # build up the command
-          command = 'puppet agent'
-          command << ' --verbose --no-daemonize'
-          command << ' --no-usecacheonfailure'
-          command << ' --no-splay --show_diff'
-
-          ret = remote.execute command
+            ret = remote.execute command
+          end
+        rescue Exception => e
+          exception = e
+        ensure
           remote.disconnect
         end
 
@@ -101,6 +111,7 @@ module Lita
           response.reply "/code " + ret.stdout.join("\n").gsub(/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]/, '')
         else
           response.reply "#{username}, your puppet run is done, but didn't seem to work... I think it may have timed out."
+          response.reply "/code " + exception.message
         end
       end
 
