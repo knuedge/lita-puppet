@@ -16,11 +16,12 @@ module Lita
       )
 
       def r10k_deploy(response)
-        environment = response.matches[0][4]
+        environment = response.matches[0][3]
         control_repo = config.control_repo_path || '/opt/puppet/control'
         user = config.ssh_user || 'lita'
+        username = response.user.name
 
-        response.reply("I'll get right on that. Give me a moment and I'll let you know how it went.")
+        response.reply("#{username}, I'll get right on that. Give me a moment and I'll let you know how it went.")
 
         ret = nil
 
@@ -43,13 +44,12 @@ module Lita
         end
 
         # build a reply
-        reply_text = "Here's what happened:\n"
+        response.reply("#{username}, your r10k deployment is done!")
         if ret
-          reply_text << ret.stdout.join("\n")
+          response.reply ret.stdout.join("\n")
         else
-          reply_text = "That didn't seem to work... I think it timed out."
+          response.reply "But didn't seem to work... I think it may have timed out."
         end
-        response.reply(reply_text)
       end
 
       Lita.register_handler(self)
