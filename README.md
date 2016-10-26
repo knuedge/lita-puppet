@@ -12,8 +12,17 @@ gem "lita-puppet"
 
 ## Configuration
 
-TODO: Describe any configuration attributes the plugin exposes.
+* `config.handlers.puppet.master_hostname` - Puppet Master's hostname
+* `config.handlers.puppet.ssh_user` - SSH user for the Puppet Master for r10k deployments
+* `config.handlers.puppet.control_repo_path` - Path for `git pull` during r10k deployments
 
 ## Usage
 
-TODO: Describe the plugin's features and how to use them.
+#### Deploying an environment via r10k
+    puppet r10k [environment]
+
+This is also available as:
+
+    puppet deploy [environment]
+    pp deploy [environment]
+    pp r10k [environment]
