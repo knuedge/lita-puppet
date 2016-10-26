@@ -27,10 +27,13 @@ module Utils
         remote.disconnect
       end
 
-      result[:exception] = exception
-      result[:exit_status] = output.exit_status
-      result[:stdout] = output.stdout
-      result[:stderr] = output.stderr
+      if exception
+        result[:exception] = exception
+      else
+        result[:exit_status] = output.exit_status
+        result[:stdout] = output.stdout
+        result[:stderr] = output.stderr
+      end
       return result
     end
   end
