@@ -2,7 +2,7 @@ module Lita
   module Handlers
     class Puppet < Handler
       namespace 'Puppet'
-      config :, required: true, type: String
+      config :master_hostname, required: true, type: String
       config :ssh_user, required: false, type: String
       config :control_repo_path, required: false, type: String
 
