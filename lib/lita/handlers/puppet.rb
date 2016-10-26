@@ -20,6 +20,10 @@ module Lita
         control_repo = config.control_repo_path || '/opt/puppet/control'
         user = config.ssh_user || 'lita'
 
+        response.reply("I'll get right on that. Give me a moment and I'll let you know how it went.")
+
+        ret = nil
+
         Timeout::timeout(600) do
           puppet_master = Rye::Box.new(config.master_hostname, user: user)
           puppet_master.cd control_repo
@@ -40,7 +44,11 @@ module Lita
 
         # build a reply
         reply_text = "Here's what happened:\n"
-        reply_text << ret.stdout.join("\n")
+        if ret
+          reply_text << ret.stdout.join("\n")
+        else
+          reply_text = "That didn't seem to work... I think it timed out."
+        end
         response.reply(reply_text)
       end
 
