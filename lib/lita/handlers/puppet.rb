@@ -2,7 +2,7 @@ module Lita
   module Handlers
     class Puppet < Handler
       namespace 'Puppet'
-      config :master_hostname, required: true, type: String
+      config :, required: true, type: String
       config :ssh_user, required: false, type: String
       config :control_repo_path, required: false, type: String
 
@@ -18,9 +18,10 @@ module Lita
       def r10k_deploy(response)
         environment = response.matches[0][4]
         control_repo = config.control_repo_path || '/opt/puppet/control'
+        user = config.ssh_user || 'lita'
 
         Timeout::timeout(600) do
-          puppet_master = Rye::Box.new(host, user: user)
+          puppet_master = Rye::Box.new(config.master_hostname, user: user)
           puppet_master.cd control_repo
 
           # Need to use sudo from here on
