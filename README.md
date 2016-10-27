@@ -1,6 +1,6 @@
 # lita-puppet
 
-TODO: Add a description of the plugin.
+A [Lita](https://www.lita.io/) handler plugin for some basic [Puppet](https://puppet.com/) operations.
 
 ## Installation
 
@@ -26,3 +26,16 @@ This is also available as:
     puppet deploy [environment]
     pp deploy [environment]
     pp r10k [environment]
+
+#### Trigger a manual run of the Puppet agent on a host
+    puppet agent run on <host>
+
+This is also available as:
+
+    puppet run on <host>
+    puppet run <host>
+    pp agent run on <host>
+    pp run on <host>
+    pp on <host>
+
+Though we don't recomend that last one...
