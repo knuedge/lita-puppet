@@ -12,9 +12,10 @@ gem "lita-puppet"
 
 ## Configuration
 
-* `config.handlers.puppet.master_hostname` - Puppet Master's hostname
-* `config.handlers.puppet.ssh_user` - SSH user for the Puppet Master for r10k deployments
 * `config.handlers.puppet.control_repo_path` - Path for `git pull` during r10k deployments
+* `config.handlers.puppet.master_hostname` - Puppet Master's hostname
+* `config.handlers.puppet.puppetdb_url` - PuppetDB hostname (for the [puppetdb-ruby](https://github.com/voxpupuli/puppetdb-ruby) gem)
+* `config.handlers.puppet.ssh_user` - SSH user for the Puppet Master for r10k deployments
 
 ## Usage
 
@@ -48,3 +49,14 @@ This is also available as:
     pp cert clean <host>
 
 **Note** though that this doesn't do anything on the client side. If you want puppet to work on the `<host>` machine you'll need to generate a new cert. Usually you run this if you're planning to do that anyway though.
+
+#### Query PuppetDB for the Roles and Profiles used by a node
+    puppet catalog <certname> profiles
+
+This is also available as:
+
+    puppet node <certname> profiles
+    pp catalog <certname> profiles
+    pp node <certname> profiles
+
+Where `<certname>` is the SSL certificate name used for Puppet. This is usually the FQDN for the host.
