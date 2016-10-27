@@ -11,7 +11,7 @@ module Utils
       # TODO: validate url and nodename
       ::PuppetDB::Client.new(server: url) # this is weird but required
       d = ::PuppetDB::Client.get("/catalogs/#{nodename}")
-      return d["error"] if d.is_a?(Hash) && d['error']
+      return d["error"] if d['error']
 
       tags = []
       d["data"]["resources"].each {|r| tags.concat(r['tags'])}
