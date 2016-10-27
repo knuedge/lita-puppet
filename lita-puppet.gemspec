@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "lita-puppet"
-  spec.version       = "0.5.0"
+  spec.version       = "0.5.1"
   spec.authors       = ["Jonathan Gnagy"]
   spec.email         = ["jgnagy@knuedge.com"]
   spec.description   = "Some basic Puppet interactions for Lita"
@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "lita", "~> 4.7"
   spec.add_runtime_dependency "rye"
-  spec.add_runtime_dependency "puppetdb"
+  spec.add_runtime_dependency "puppetdb-ruby"
 
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "pry-byebug"
