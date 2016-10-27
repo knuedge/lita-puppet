@@ -39,3 +39,12 @@ This is also available as:
     pp on <host>
 
 Though we don't recomend that last one...
+
+#### Remove an SSL cert from the Puppet Master
+    puppet cert clean <host>
+
+This is also available as:
+
+    pp cert clean <host>
+
+**Note** though that this doesn't do anything on the client side. If you want puppet to work on the `<host>` machine you'll need to generate a new cert. Usually you run this if you're planning to do that anyway though.
