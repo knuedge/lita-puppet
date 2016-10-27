@@ -21,7 +21,7 @@ module Utils
         Timeout::timeout(opts[:timeout]) do
           yield remote # pass our host back to the user to work with
         end
-      rescue Exception => e
+      rescue => e
         exception = e
       ensure
         remote.disconnect
