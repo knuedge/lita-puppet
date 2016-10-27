@@ -56,7 +56,7 @@ module Lita
         if result[:exception]
           response.reply "#{username}, your `puppet cert clean` didn't seem to work... ;-("
           response.reply "/code " + result[:exception].message
-          raise result[:exception]
+          return false
         end
 
         # build a reply
@@ -118,7 +118,7 @@ module Lita
         if result1[:exception]
           response.reply "#{username}, your r10k run didn't seem to work. Looks like there was a problem with Git:"
           response.reply "/code " + result1[:exception].message
-          raise result1[:exception]
+          return false
         end
 
         result2 = over_ssh(host: config.master_hostname, user: user) do |server|
@@ -136,7 +136,7 @@ module Lita
         if result2[:exception]
           response.reply "#{username}, your r10k run didn't seem to work... Maybe it timed out?"
           response.reply "/code " + result2[:exception].message
-          raise result2[:exception]
+          return false
         end
 
         # build a reply
