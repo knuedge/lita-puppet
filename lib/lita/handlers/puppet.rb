@@ -5,6 +5,7 @@ module Lita
       config :master_hostname, required: true, type: String
       config :ssh_user, required: false, type: String
       config :control_repo_path, required: false, type: String
+      config :puppetdb_url, required: false, type: String
 
       route(
         /(puppet|pp)(\s+agent)?\s+(run)(\s+on)?\s+(\S+)/i,
@@ -21,6 +22,15 @@ module Lita
         command: true,
         help: {
           "puppet cert clean <host>" => "Remove all traces of the SSL cert for <host> on the Puppet Master."
+        }
+      )
+
+      route(
+        /(puppet|pp)\s+(catalog|node)\s+(\S+)\s+(profiles)/i,
+        :node_profiles,
+        command: true,
+        help: {
+          "puppet catalog <host> profiles" => "Query PuppetDB to get a list of all roles and profiles applied to <host>."
         }
       )
 
@@ -98,6 +108,30 @@ module Lita
         else
           response.reply "#{username}, your puppet run is done, but didn't seem to work... I think it may have timed out."
           response.reply "/code " + result[:exception].message
+        end
+      end
+
+      def node_profiles(response)
+        host = response.matches[0][2]
+        url  = config.puppetdb_url
+        username = friendly_name(response.user.name)
+
+        unless url
+          cant_reply = "#{username}, I would do that, but I don't know how to connect to PuppetDB."
+          cant_reply << "Edit my config and add `config.handlers.puppet.puppetdb_url`."
+          response.reply(cant_reply)
+          return false
+        end
+
+        response.reply("#{username}, let me see what I can find in PuppetDB for you.")
+
+        profiles = node_roles_and_profiles(url, host)
+        if profiles.is_a? String
+          response.reply("Hmmm, that didn't work. Here's what PuppetDB responded with: '#{profiles}'")
+          return false
+        else
+          response.reply("Here are the profiles and roles for #{host}:")
+          response.reply("/code" + profiles.join("\n"))
         end
       end
 
