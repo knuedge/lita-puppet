@@ -12,16 +12,22 @@ module Utils
         opts[:host],
         user: opts[:user],
         auth_methods: ['publickey'],
-        password_prompt: false
+        password_prompt: false,
+        error: STDOUT # send STDERR to STDOUT for things that actually print
       )
 
       exception = nil
 
+      # Getting serious about not crashing Lita...
       output = begin
         Timeout::timeout(opts[:timeout]) do
           yield remote # pass our host back to the user to work with
         end
-      rescue => e
+      rescue Rye::Err => e
+        exception = e
+      rescue StandardError => e
+        exception = e
+      rescue Exception => e
         exception = e
       ensure
         remote.disconnect
