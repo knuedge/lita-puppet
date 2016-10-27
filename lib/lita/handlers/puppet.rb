@@ -43,6 +43,7 @@ module Lita
         }
       )
 
+      include ::Utils::PuppetDB
       include ::Utils::SSH
       include ::Utils::Text
 

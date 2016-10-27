@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "lita-puppet"
-  spec.version       = "0.5.1"
+  spec.version       = "0.5.2"
   spec.authors       = ["Jonathan Gnagy"]
   spec.email         = ["jgnagy@knuedge.com"]
   spec.description   = "Some basic Puppet interactions for Lita"
