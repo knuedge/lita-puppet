@@ -83,7 +83,7 @@ module Lita
 
           # build up the command
           command = 'puppet agent'
-          command << ' --verbose --no-daemonize'
+          command << ' --onetime --verbose --no-daemonize'
           command << ' --no-usecacheonfailure'
           command << ' --no-splay --show_diff 2>&1'
 
