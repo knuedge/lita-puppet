@@ -19,13 +19,13 @@ gem "lita-puppet"
 ## Usage
 
 #### Deploying an environment via r10k
-    puppet r10k [environment]
+    puppet r10k [environment [module]]
 
 This is also available as:
 
-    puppet deploy [environment]
-    pp deploy [environment]
-    pp r10k [environment]
+    puppet deploy [environment [module]]
+    pp deploy [environment [module]]
+    pp r10k [environment [module]]
 
 #### Trigger a manual run of the Puppet agent on a host
     puppet agent run on <host>

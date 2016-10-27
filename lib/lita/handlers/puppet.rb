@@ -25,11 +25,11 @@ module Lita
       )
 
       route(
-        /(puppet|pp)\s+(r10k|deploy)(\s+(\S+))?/i,
+        /(puppet|pp)\s+(r10k|deploy)(\s+(\S+)(\s+(\S+))?)?/i,
         :r10k_deploy,
         command: true,
         help: {
-          "puppet r10k [env]" => "Deploy the latest puppet code on the puppet master via r10k, optionally specifying an environment."
+          "puppet r10k [env [module]]" => "Deploy the latest puppet code on the puppet master via r10k, optionally specifying an environment, and possibly a module."
         }
       )
 
@@ -50,7 +50,7 @@ module Lita
           # scary...
           server.disable_safe_mode
 
-          server.execute "puppet cert clean #{cert}"
+          server.execute "puppet cert clean #{cert} 2>&1"
         end
 
         if result[:exception]
@@ -85,7 +85,7 @@ module Lita
           command = 'puppet agent'
           command << ' --verbose --no-daemonize'
           command << ' --no-usecacheonfailure'
-          command << ' --no-splay --show_diff'
+          command << ' --no-splay --show_diff 2>&1'
 
           server.execute command
         end
@@ -103,6 +103,7 @@ module Lita
 
       def r10k_deploy(response)
         environment = response.matches[0][3]
+        mod = response.matches[0][5]
         control_repo = config.control_repo_path || '/opt/puppet/control'
         user = config.ssh_user || 'lita'
         username = friendly_name(response.user.name)
@@ -127,9 +128,17 @@ module Lita
           # scary...
           server.disable_safe_mode
 
-          command = "r10k deploy environment"
-          command << " #{environment}" if environment
-          command << ' -pv'
+          command = "r10k deploy"
+          if environment && mod
+            command << ' module'
+            command << " -e #{environment}"
+            command << " #{mod}"
+            command << " -v"
+          else
+            command << " environment"
+            command << " #{environment}" if environment
+            command << ' -pv'
+          end
           server.execute command
         end
 
