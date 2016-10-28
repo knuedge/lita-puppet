@@ -59,4 +59,9 @@ This is also available as:
     pp catalog <certname> profiles
     pp node <certname> profiles
 
-Where `<certname>` is the SSL certificate name used for Puppet. This is usually the FQDN for the host.
+Where `<certname>` is the SSL certificate name used for Puppet. This is usually the FQDN for the host. This query assumes you use the roles and profiles paradigm with the classes namespaced as `profile::example` and `role::example` etc..
+
+#### Query PuppetDB for all nodes with a given class in their catalog
+`puppet class nodes <classname> `
+
+Where `classname` is the name of the class you'd like to query for.
