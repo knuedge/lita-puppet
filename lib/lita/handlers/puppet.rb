@@ -35,6 +35,15 @@ module Lita
       )
 
       route(
+        /(puppet|pp)\s+(class)\s+(nodes)\s+(\S+)/i,
+        :nodes_with_class,
+        command: true,
+        help: {
+          "puppet class nodes <class>" => "Query PuppetDB to get a list of all nodes containing a class."
+        }
+      )
+
+      route(
         /(puppet|pp)\s+(r10k|deploy)(\s+(\S+)(\s+(\S+))?)?/i,
         :r10k_deploy,
         command: true,
@@ -135,6 +144,31 @@ module Lita
           response.reply("/code" + profiles.join("\n"))
         end
       end
+
+      def nodes_with_class(response)
+        puppet_class = response.matches[0][3]
+        url = config.puppetdb_url
+        username = friendly_name(response.user.name)
+
+        unless url
+          cant_reply = "#{username}, I would do that, but I don't know how to connect to PuppetDB."
+          cant_reply << "Edit my config and add `config.handlers.puppet.puppetdb_url`."
+          response.reply(cant_reply)
+          return false
+        end
+
+        response.reply("#{username}, let me see what I can find in PuppetDB for you.")
+
+        puppet_classes = class_nodes(url, puppet_class)
+        if puppet_classes.empty?
+          response.reply("There are no nodes with #{puppet_class} class, are you sure its a valid class?")
+          return false
+        else
+          response.reply("Here are all the nodes with class #{puppet_class}:")
+          response.reply("/code" + puppet_classes.join("\n"))
+        end
+      end
+
 
       def r10k_deploy(response)
         environment = response.matches[0][3]

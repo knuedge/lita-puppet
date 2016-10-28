@@ -19,5 +19,13 @@ module Utils
       # return all the tags related to profile:: or role::
       tags.sort.uniq.select {|t| t.match /^(profile|role)::/ }
     end
+
+    def class_nodes(url, classname)
+      client = ::PuppetDB::Client.new(server: url)
+      q = client.request('resources',[:and,[:'=','type', 'Class'],[:'=','title',"#{classname}"]])
+
+      q.data.map { |node| node['certname'] }
+    end
+
   end
 end
