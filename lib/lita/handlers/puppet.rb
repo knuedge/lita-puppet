@@ -75,14 +75,14 @@ module Lita
 
         if result[:exception]
           response.reply "#{username}, your `puppet cert clean` didn't seem to work... ;-("
-          response.reply "/code " + result[:exception].message
+          response.reply as_code(result[:exception].message)
           return false
         end
 
         # build a reply
         response.reply("#{username}, your `puppet cert clean` is all done!")
         reply_content = [result[:stdout].join("\n"), result[:stderr].join("\n")].join("\n")
-        response.reply "/code " + sanitze_for_chat(reply_content)
+        response.reply as_code(reply_content)
       end
 
       def puppet_agent_run(response)
@@ -114,10 +114,10 @@ module Lita
         if !result[:exception]
           response.reply "#{username}, that puppet run is complete! It exited with status #{result[:exit_status]}."
           # Send the standard out, but strip off the bash color code stuff...
-          response.reply "/code " + sanitze_for_chat(result[:stdout].join("\n"))
+          response.reply as_code(result[:stdout].join("\n"))
         else
           response.reply "#{username}, your puppet run is done, but didn't seem to work... I think it may have timed out."
-          response.reply "/code " + result[:exception].message
+          response.reply as_code(result[:exception].message)
         end
       end
 
@@ -141,7 +141,7 @@ module Lita
           return false
         else
           response.reply("Here are the profiles and roles for #{host}:")
-          response.reply("/code" + profiles.join("\n"))
+          response.reply as_code(profiles.join("\n"))
         end
       end
 
@@ -165,7 +165,7 @@ module Lita
           return false
         else
           response.reply("Here are all the nodes with class #{puppet_class}:")
-          response.reply("/code" + puppet_classes.join("\n"))
+          response.reply as_code(puppet_classes.join("\n"))
         end
       end
 
@@ -187,7 +187,7 @@ module Lita
 
         if result1[:exception]
           response.reply "#{username}, your r10k run didn't seem to work. Looks like there was a problem with Git:"
-          response.reply "/code " + result1[:exception].message
+          response.reply as_code(result1[:exception].message)
           return false
         end
 
@@ -213,14 +213,14 @@ module Lita
 
         if result2[:exception]
           response.reply "#{username}, your r10k run didn't seem to work... Maybe it timed out?"
-          response.reply "/code " + result2[:exception].message
+          response.reply as_code(result2[:exception].message)
           return false
         end
 
         # build a reply
         response.reply("#{username}, your r10k deployment is done!")
         reply_content = [result1[:stdout].join("\n"), result2[:stderr].join("\n")].join("\n")
-        response.reply "/code " + sanitze_for_chat(reply_content)
+        response.reply as_code(reply_content)
       end
 
       Lita.register_handler(self)

@@ -11,5 +11,12 @@ module Utils
       # Remove bash colorings
       text.gsub(/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]/, '')
     end
+
+    # Format some text as code
+    #  Note that this is HipChat specific for the moment
+    # TODO: Make this *not* HipChat specific
+    def as_code(text)
+      "/code " + sanitze_for_chat(text)
+    end
   end
 end
