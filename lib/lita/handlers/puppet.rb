@@ -158,8 +158,9 @@ module Lita
         end
 
         response.reply("#{username}, let me see what I can find in PuppetDB for you.")
-
-        puppet_classes = class_nodes(url, puppet_class)
+        
+        search = class_camel(puppet_class)
+        puppet_classes = class_nodes(url, search)
         if puppet_classes.empty?
           response.reply("There are no nodes with #{puppet_class} class, are you sure its a valid class?")
           return false
