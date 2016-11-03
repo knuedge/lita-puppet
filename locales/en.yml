@@ -2,3 +2,43 @@ en:
   lita:
     handlers:
       puppet:
+        help:
+          puppet_agent_run:
+            syntax: puppet agent run on <host>
+            desc: Run the puppet agent on <host>.
+          cert_clean:
+            syntax: puppet cert clean <host>
+            desc: Remove all traces of the SSL cert for <host> on the Puppet Master.
+          node_profiles:
+            syntax: puppet catalog <host> profiles
+            desc: Query PuppetDB to get a list of all roles and profiles applied to <host>.
+          nodes_with_class:
+            syntax: puppet class nodes <class>
+            desc: Query PuppetDB to get a list of all nodes containing a class.
+          r10k_deploy:
+            syntax: puppet r10k [env [module]]
+            desc: Deploy the latest puppet code on the puppet master via r10k, optionally specifying an environment, and possibly a module.
+        replies:
+          cert_clean:
+            working: "working on that `puppet cert clean`. I'll get right back to you."
+            failure: "your `puppet cert clean` didn't seem to work... ;-("
+            success: "your `puppet cert clean` is all done!"
+          puppet_agent_run:
+            working: "I'll run puppet right away. Give me a sec and I'll let you know how it goes."
+            failure: "your puppet run is done, but didn't seem to work... I think it may have timed out."
+            success: "that puppet run is complete! It exited with status %{status}."
+          node_profiles:
+            notconf: "I would do that, but I don't know how to connect to PuppetDB. Edit my config and add `config.handlers.puppet.puppetdb_url`."
+            working: "let me see what I can find in PuppetDB for you."
+            failure: "Hmmm, that didn't work. Here's what PuppetDB responded with: '%{error}'"
+            success: "Here are the profiles and roles for %{host}:"
+          nodes_with_class:
+            notconf: "I would do that, but I don't know how to connect to PuppetDB. Edit my config and add `config.handlers.puppet.puppetdb_url`."
+            working: "let me see what I can find in PuppetDB for you."
+            failure: "There are no nodes with %{pclass} class, are you sure it's a valid class?"
+            success: "Here are all the nodes with class %{pclass}:"
+          r10k_deploy:
+            working: "I'll get right on that. Give me a moment and I'll let you know how it went."
+            gitfail: "your r10k run didn't seem to work. Looks like there was a problem with Git:"
+            pupfail: "your r10k run didn't seem to work. Here's what went wrong:"
+            success: "your r10k deployment is done!"

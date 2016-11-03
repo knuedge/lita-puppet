@@ -3,225 +3,185 @@ module Lita
     class Puppet < Handler
       namespace 'Puppet'
       config :master_hostname, required: true, type: String
-      config :ssh_user, required: false, type: String
-      config :control_repo_path, required: false, type: String
+      config :ssh_user, required: false, type: String, default: 'lita'
+      config :control_repo_path, required: false, type: String, default: '/opt/puppet/control'
       config :puppetdb_url, required: false, type: String
 
       route(
         /(puppet|pp)(\s+agent)?\s+(run)(\s+on)?\s+(\S+)/i,
         :puppet_agent_run,
         command: true,
-        help: {
-          "puppet agent run on <host>" => "Run the puppet agent on <host>."
-        }
+        help: { t('help.puppet_agent_run.syntax') => t('help.puppet_agent_run.desc') }
       )
 
       route(
         /(puppet|pp)\s+(cert)\s+(clean)\s+(\S+)/i,
         :cert_clean,
         command: true,
-        help: {
-          "puppet cert clean <host>" => "Remove all traces of the SSL cert for <host> on the Puppet Master."
-        }
+        help: { t('help.cert_clean.syntax') => t('help.cert_clean.desc') }
       )
 
       route(
         /(puppet|pp)\s+(catalog|node)\s+(\S+)\s+(profiles)/i,
         :node_profiles,
         command: true,
-        help: {
-          "puppet catalog <host> profiles" => "Query PuppetDB to get a list of all roles and profiles applied to <host>."
-        }
+        help: { t('help.node_profiles.syntax') => t('help.node_profiles.desc') }
       )
 
       route(
         /(puppet|pp)\s+(class)\s+(nodes)\s+(\S+)/i,
         :nodes_with_class,
         command: true,
-        help: {
-          "puppet class nodes <class>" => "Query PuppetDB to get a list of all nodes containing a class."
-        }
+        help: { t('help.nodes_with_class.syntax') => t('help.nodes_with_class.desc') }
       )
 
       route(
         /(puppet|pp)\s+(r10k|deploy)(\s+(\S+)(\s+(\S+))?)?/i,
         :r10k_deploy,
         command: true,
-        help: {
-          "puppet r10k [env [module]]" => "Deploy the latest puppet code on the puppet master via r10k, optionally specifying an environment, and possibly a module."
-        }
+        help: { t('help.r10k_deploy.syntax') => t('help.r10k_deploy.desc') }
       )
 
-      include ::Utils::PuppetDB
-      include ::Utils::SSH
-      include ::Utils::Text
+      include ::Utils::LitaPuppet::PuppetDB
+      include ::Utils::LitaPuppet::SSH
+      include ::Utils::LitaPuppet::Text
 
       def cert_clean(response)
         cert = response.matches[0][3]
-        user = config.ssh_user || 'lita'
-        username = friendly_name(response.user.name)
 
-        response.reply("#{username}, working on that `puppet cert clean`. I'll get right back to you.")
+        response.reply_with_mention(t('replies.cert_clean.working'))
 
-        result = over_ssh(host: config.master_hostname, user: user, timeout: 120) do |server|
-          server.cd '/tmp'
-          # Need to use sudo
-          server.enable_sudo
-          # scary...
-          server.disable_safe_mode
-
-          server.execute "puppet cert clean #{cert} 2>&1"
-        end
+        result = cert_clean_result(config.master_hostname, config.ssh_user, cert)
 
         if result[:exception]
-          response.reply "#{username}, your `puppet cert clean` didn't seem to work... ;-("
-          response.reply as_code(result[:exception].message)
-          return false
+          fail_message t('replies.cert_clean.failure'), result[:exception].message
+        else
+          success_message(
+            t('replies.cert_clean.success'),
+            (result[:stdout] + result[:stderr]).join("\n")
+          )
         end
-
-        # build a reply
-        response.reply("#{username}, your `puppet cert clean` is all done!")
-        reply_content = [result[:stdout].join("\n"), result[:stderr].join("\n")].join("\n")
-        response.reply as_code(reply_content)
       end
 
       def puppet_agent_run(response)
         host = response.matches[0][4]
-        user = config.ssh_user || 'lita'
-        username = friendly_name(response.user.name)
 
-        response.reply("#{username}, I'll run puppet right away. Give me a sec and I'll let you know how it goes.")
+        response.reply_with_mention(t('replies.puppet_agent_run.working'))
 
-        result = over_ssh(host: host, user: user) do |server|
-          server.cd '/tmp'
-
-          # Need to use sudo from here on
-          server.enable_sudo
-
-          # scary...
-          server.disable_safe_mode
-
-          # build up the command
-          command = 'puppet agent'
-          command << ' --onetime --verbose --no-daemonize'
-          command << ' --no-usecacheonfailure'
-          command << ' --no-splay --show_diff 2>&1'
-
-          server.execute command
-        end
+        result = simple_ssh_command(host, config.ssh_user, agent_command)
 
         # build a reply
-        if !result[:exception]
-          response.reply "#{username}, that puppet run is complete! It exited with status #{result[:exit_status]}."
-          # Send the standard out, but strip off the bash color code stuff...
-          response.reply as_code(result[:stdout].join("\n"))
+        if result[:exception]
+          fail_message t('replies.puppet_agent_run.failure'), result[:exception].message
         else
-          response.reply "#{username}, your puppet run is done, but didn't seem to work... I think it may have timed out."
-          response.reply as_code(result[:exception].message)
+          success_message(
+            t('replies.puppet_agent_run.success', status: result[:exit_status]),
+            result[:stdout].join("\n")
+          )
         end
       end
 
       def node_profiles(response)
         host = response.matches[0][2]
         url  = config.puppetdb_url
-        username = friendly_name(response.user.name)
 
         unless url
-          cant_reply = "#{username}, I would do that, but I don't know how to connect to PuppetDB."
-          cant_reply << "Edit my config and add `config.handlers.puppet.puppetdb_url`."
-          response.reply(cant_reply)
+          response.reply(t('replies.node_profiles.notconf'))
           return false
         end
 
-        response.reply("#{username}, let me see what I can find in PuppetDB for you.")
+        response.reply_with_mention(t('replies.node_profiles.working'))
 
         profiles = node_roles_and_profiles(url, host)
+
         if profiles.is_a? String
-          response.reply("Hmmm, that didn't work. Here's what PuppetDB responded with: '#{profiles}'")
-          return false
+          fail_message t('replies.node_profiles.failure', error: profiles)
         else
-          response.reply("Here are the profiles and roles for #{host}:")
-          response.reply as_code(profiles.join("\n"))
+          success_message t('replies.node_profiles.success', host: host), profiles.join("\n")
         end
       end
 
       def nodes_with_class(response)
         puppet_class = response.matches[0][3]
         url = config.puppetdb_url
-        username = friendly_name(response.user.name)
 
         unless url
-          cant_reply = "#{username}, I would do that, but I don't know how to connect to PuppetDB."
-          cant_reply << "Edit my config and add `config.handlers.puppet.puppetdb_url`."
-          response.reply(cant_reply)
+          response.reply(t('replies.nodes_with_class.notconf'))
           return false
         end
 
-        response.reply("#{username}, let me see what I can find in PuppetDB for you.")
-        
-        search = class_camel(puppet_class)
-        puppet_classes = class_nodes(url, search)
+        response.reply_with_mention(t('replies.nodes_with_class.working'))
+
+        puppet_classes = class_nodes(url, class_camel(puppet_class))
         if puppet_classes.empty?
-          response.reply("There are no nodes with #{puppet_class} class, are you sure its a valid class?")
-          return false
+          fail_message t('replies.nodes_with_class.failure', pclass: puppet_class)
         else
-          response.reply("Here are all the nodes with class #{puppet_class}:")
-          response.reply as_code(puppet_classes.join("\n"))
+          success_message(
+            t('replies.nodes_with_class.success', pclass: puppet_class),
+            puppet_classes.join("\n")
+          )
         end
       end
 
-
+      # rubocop:disable Metrics/AbcSize
       def r10k_deploy(response)
         environment = response.matches[0][3]
         mod = response.matches[0][5]
-        control_repo = config.control_repo_path || '/opt/puppet/control'
-        user = config.ssh_user || 'lita'
-        username = friendly_name(response.user.name)
+        user = config.ssh_user
 
-        response.reply("#{username}, I'll get right on that. Give me a moment and I'll let you know how it went.")
+        response.reply_with_mention(t('replies.r10k_deploy.working'))
 
-        result1 = over_ssh(host: config.master_hostname, user: user, timeout: 120) do |server|
-          # Need to use sudo
-          server.enable_sudo
-          server[control_repo].git :pull
-        end
+        result1 = r10k_git_result(config.master_hostname, user, config.control_repo_path)
 
         if result1[:exception]
-          response.reply "#{username}, your r10k run didn't seem to work. Looks like there was a problem with Git:"
-          response.reply as_code(result1[:exception].message)
+          fail_message t('replies.r10k_deploy.gitfail'), result1[:exception].message
           return false
         end
 
-        result2 = over_ssh(host: config.master_hostname, user: user) do |server|
+        result2 = simple_ssh_command(config.master_hostname, user, r10k_command(environment, mod))
+
+        if result2[:exception]
+          fail_message t('replies.r10k_deploy.pupfail'), result2[:exception].message
+        else
+          success_message(
+            t('replies.r10k_deploy.success'),
+            [result1[:stdout].join("\n"), result2[:stderr].join("\n")].join("\n")
+          )
+        end
+      end
+
+      private
+
+      def fail_message(message, data = nil)
+        response.reply_with_mention(message)
+        response.reply(as_code(data)) if data
+      end
+
+      alias success_message fail_message
+
+      def simple_ssh_command(host, user, command, timeout = 300)
+        over_ssh(host: host, user: user, timeout: timeout) do |server|
+          server.cd '/tmp'
           # Need to use sudo
           server.enable_sudo
           # scary...
           server.disable_safe_mode
 
-          command = "r10k deploy"
-          if environment && mod
-            command << ' module'
-            command << " -e #{environment}"
-            command << " #{mod}"
-            command << " -v"
-          else
-            command << " environment"
-            command << " #{environment}" if environment
-            command << ' -pv'
-          end
           server.execute command
         end
+      end
 
-        if result2[:exception]
-          response.reply "#{username}, your r10k run didn't seem to work... Maybe it timed out?"
-          response.reply as_code(result2[:exception].message)
-          return false
+      def cert_clean_result(host, user, cert)
+        cmd = "puppet cert clean #{cert} 2>&1"
+        simple_ssh_command(host, user, cmd, 120)
+      end
+
+      def r10k_git_result(host, user, repo_location)
+        over_ssh(host: host, user: user, timeout: 120) do |server|
+          # Need to use sudo
+          server.enable_sudo
+          server[repo_location].git :pull
         end
-
-        # build a reply
-        response.reply("#{username}, your r10k deployment is done!")
-        reply_content = [result1[:stdout].join("\n"), result2[:stderr].join("\n")].join("\n")
-        response.reply as_code(reply_content)
       end
 
       Lita.register_handler(self)
