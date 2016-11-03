@@ -167,18 +167,6 @@ module Lita
 
       alias success_message fail_message
 
-      def simple_ssh_command(host, user, command, timeout = 300)
-        over_ssh(host: host, user: user, timeout: timeout) do |server|
-          server.cd '/tmp'
-          # Need to use sudo
-          server.enable_sudo
-          # scary...
-          server.disable_safe_mode
-
-          server.execute command
-        end
-      end
-
       def cert_clean_result(host, user, cert)
         cmd = "puppet cert clean #{cert} 2>&1"
         simple_ssh_command(host, user, cmd, 120)

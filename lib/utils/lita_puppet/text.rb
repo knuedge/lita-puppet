@@ -2,15 +2,11 @@ module Utils
   module LitaPuppet
     # Utility methods for manipulating text
     module Text
-      # Strip off bad characters
-      def sanitze_for_chat(text)
-        # Remove bash colorings
-        text.gsub(/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]/, '')
-      end
-
-      # camel case puppet classes
-      def class_camel(text)
-        text.split('::').map(&:capitalize).join('::')
+      def agent_command
+        command = 'puppet agent'
+        command << ' --onetime --verbose --no-daemonize'
+        command << ' --no-usecacheonfailure'
+        command << ' --no-splay --show_diff 2>&1'
       end
 
       # Format some text as code
@@ -18,6 +14,11 @@ module Utils
       # TODO: Make this *not* HipChat specific
       def as_code(text)
         '/code ' + sanitze_for_chat(text)
+      end
+
+      # camel case puppet classes
+      def class_camel(text)
+        text.split('::').map(&:capitalize).join('::')
       end
 
       def r10k_command(environment, mod)
@@ -31,11 +32,10 @@ module Utils
         end
       end
 
-      def agent_command
-        command = 'puppet agent'
-        command << ' --onetime --verbose --no-daemonize'
-        command << ' --no-usecacheonfailure'
-        command << ' --no-splay --show_diff 2>&1'
+      # Strip off bad characters
+      def sanitze_for_chat(text)
+        # Remove bash colorings
+        text.gsub(/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]/, '')
       end
     end
   end

@@ -2,6 +2,20 @@ module Utils
   module LitaPuppet
     # Utility methods for working with PuppetDB
     module PuppetDB
+      def class_nodes(url, classname)
+        client = ::PuppetDB::Client.new(server: url)
+        q = client.request(
+          'resources',
+          [
+            :and,
+            [:'=', 'type', 'Class'],
+            [:'=', 'title', classname.to_s]
+          ]
+        )
+
+        q.data.map { |node| node['certname'] }
+      end
+
       def dbquery(url, q)
         # TODO: validate incoming query structure
         client = ::PuppetDB::Client.new(server: url)
@@ -19,20 +33,6 @@ module Utils
 
         # return all the tags related to profile:: or role::
         tags.sort.uniq.select { |t| t.match(/^(profile|role)::/) }
-      end
-
-      def class_nodes(url, classname)
-        client = ::PuppetDB::Client.new(server: url)
-        q = client.request(
-          'resources',
-          [
-            :and,
-            [:'=', 'type', 'Class'],
-            [:'=', 'title', classname.to_s]
-          ]
-        )
-
-        q.data.map { |node| node['certname'] }
       end
     end
   end
