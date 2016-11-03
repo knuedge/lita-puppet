@@ -54,9 +54,10 @@ module Lita
         result = cert_clean_result(config.master_hostname, config.ssh_user, cert)
 
         if result[:exception]
-          fail_message t('replies.cert_clean.failure'), result[:exception].message
+          fail_message response, t('replies.cert_clean.failure'), result[:exception].message
         else
           success_message(
+            response,
             t('replies.cert_clean.success'),
             (result[:stdout] + result[:stderr]).join("\n")
           )
@@ -72,9 +73,10 @@ module Lita
 
         # build a reply
         if result[:exception]
-          fail_message t('replies.puppet_agent_run.failure'), result[:exception].message
+          fail_message response, t('replies.puppet_agent_run.failure'), result[:exception].message
         else
           success_message(
+            response,
             t('replies.puppet_agent_run.success', status: result[:exit_status]),
             result[:stdout].join("\n")
           )
@@ -95,9 +97,13 @@ module Lita
         profiles = node_roles_and_profiles(url, host)
 
         if profiles.is_a? String
-          fail_message t('replies.node_profiles.failure', error: profiles)
+          fail_message response, t('replies.node_profiles.failure', error: profiles)
         else
-          success_message t('replies.node_profiles.success', host: host), profiles.join("\n")
+          success_message(
+            response,
+            t('replies.node_profiles.success', host: host),
+            profiles.join("\n")
+          )
         end
       end
 
@@ -114,9 +120,10 @@ module Lita
 
         puppet_classes = class_nodes(url, class_camel(puppet_class))
         if puppet_classes.empty?
-          fail_message t('replies.nodes_with_class.failure', pclass: puppet_class)
+          fail_message response, t('replies.nodes_with_class.failure', pclass: puppet_class)
         else
           success_message(
+            response,
             t('replies.nodes_with_class.success', pclass: puppet_class),
             puppet_classes.join("\n")
           )
@@ -134,16 +141,17 @@ module Lita
         result1 = r10k_git_result(config.master_hostname, user, config.control_repo_path)
 
         if result1[:exception]
-          fail_message t('replies.r10k_deploy.gitfail'), result1[:exception].message
+          fail_message response, t('replies.r10k_deploy.gitfail'), result1[:exception].message
           return false
         end
 
         result2 = simple_ssh_command(config.master_hostname, user, r10k_command(environment, mod))
 
         if result2[:exception]
-          fail_message t('replies.r10k_deploy.pupfail'), result2[:exception].message
+          fail_message response, t('replies.r10k_deploy.pupfail'), result2[:exception].message
         else
           success_message(
+            response,
             t('replies.r10k_deploy.success'),
             [result1[:stdout].join("\n"), result2[:stderr].join("\n")].join("\n")
           )
@@ -152,7 +160,7 @@ module Lita
 
       private
 
-      def fail_message(message, data = nil)
+      def fail_message(response, message, data = nil)
         response.reply_with_mention(message)
         response.reply(as_code(data)) if data
       end
