@@ -3,9 +3,7 @@
 [![Build Status](https://img.shields.io/travis/knuedge/lita-puppet/master.svg)](https://travis-ci.org/knuedge/lita-puppet)
 [![MIT License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://tldrlegal.com/license/mit-license)
 [![RubyGems :: RMuh Gem Version](http://img.shields.io/gem/v/lita-puppet.svg)](https://rubygems.org/gems/lita-puppet)
-[![Coveralls Coverage](https://img.shields.io/coveralls/knuedge/lita-puppet/master.svg)](https://coveralls.io/r/knuedge/lita-puppet)
 [![Code Climate](https://img.shields.io/codeclimate/github/knuedge/lita-puppet.svg)](https://codeclimate.com/github/knuedge/lita-puppet)
-[![Gemnasium](https://img.shields.io/gemnasium/knuedge/lita-puppet.svg)](https://gemnasium.com/knuedge/lita-puppet)
 
 A [Lita](https://www.lita.io/) handler plugin for some basic [Puppet](https://puppet.com/) operations.
 
