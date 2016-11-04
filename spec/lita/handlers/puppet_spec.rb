@@ -19,6 +19,15 @@ describe Lita::Handlers::Puppet, lita_handler: true do
     double(exit_status: 0, stdout: ['foo'], stderr: ['bar'])
   end
 
+  let(:puppetdb_nodes) do
+    double(
+      data: [
+        { 'certname' => 'server1.foo' },
+        { 'certname' => 'server2.foo' }
+      ]
+    )
+  end
+
   it 'should have the required routes' do
     is_expected.to route_command('puppet agent run on foo').to(:puppet_agent_run)
     is_expected.to route_command('puppet cert clean foo').to(:cert_clean)
@@ -50,6 +59,31 @@ describe Lita::Handlers::Puppet, lita_handler: true do
     it 'should run a puppet agent' do
       send_command('puppet agent run on server.name', as: @user)
       expect(replies[-2]).to eq('that puppet run is complete! It exited with status 0.')
+    end
+  end
+
+  describe('#node_profiles') do
+    it 'should provide a list of profiles and roles associated with a node' do
+      allow(::PuppetDB::Client).to receive(:get).and_return(
+        'data' => {
+          'resources' => [
+            { 'tags' => ['profile::foo'] },
+            { 'tags' => ['role::baz'] }
+          ]
+        }
+      )
+      send_command('puppet catalog foo profiles', as: @user)
+      expect(replies.last).to eq("/code profile::foo\nrole::baz")
+    end
+  end
+
+  describe('#nodes_with_class') do
+    before do
+      allow_any_instance_of(::PuppetDB::Client).to receive(:request).and_return(puppetdb_nodes)
+    end
+    it 'should provide a list of nodes containing a class in their catalog' do
+      send_command('puppet class nodes profile::foo', as: @user)
+      expect(replies.last).to eq("/code server1.foo\nserver2.foo")
     end
   end
 end
