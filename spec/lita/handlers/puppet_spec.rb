@@ -5,18 +5,12 @@ describe Lita::Handlers::Puppet, lita_handler: true do
   before do
     registry.config.handlers.puppet.master_hostname = 'puppet.foo'
     registry.config.handlers.puppet.puppetdb_url = 'http://pboard.foo:8080'
-
-    # A ChatOpts user
-    @user = Lita::User.create('User', name: 'A User', mention_name: 'user')
-
-    # Stubs used throughout
-    allow_any_instance_of(Rye::Box).to receive(:enable_sudo).and_return(true)
-    allow_any_instance_of(Rye::Box).to receive(:disconnect).and_return(true)
-    allow_any_instance_of(Rye::Box).to receive(:disable_safe_mode).and_return(true)
   end
 
-  let(:base_rye_output) do
-    double(exit_status: 0, stdout: ['foo'], stderr: ['bar'])
+  let(:lita_user) { Lita::User.create('User', name: 'A User', mention_name: 'user') }
+
+  let(:new_puppetdb_request_only) do
+    instance_double('::PuppetDB::Client', request: puppetdb_nodes)
   end
 
   let(:puppetdb_nodes) do
@@ -28,6 +22,23 @@ describe Lita::Handlers::Puppet, lita_handler: true do
     )
   end
 
+  let(:rye_box) do
+    box = instance_double(
+      'Rye::Box',
+      disable_safe_mode: true,
+      disconnect: true,
+      enable_sudo: true,
+      execute: rye_output_base
+    )
+    allow(box).to receive(:cd).with('/tmp').and_return(true)
+    allow(box).to receive(:[]).with('/opt/puppet/control').and_return(rye_box_git_only)
+    box
+  end
+
+  let(:rye_box_git_only) { instance_double('Rye::Box', git: rye_output_git) }
+  let(:rye_output_base) { double(exit_status: 0, stdout: ['foo'], stderr: ['bar']) }
+  let(:rye_output_git) { double(exit_status: 0, stdout: ['Already up-to-date.'], stderr: []) }
+
   it 'should have the required routes' do
     is_expected.to route_command('puppet agent run on foo').to(:puppet_agent_run)
     is_expected.to route_command('puppet cert clean foo').to(:cert_clean)
@@ -37,27 +48,17 @@ describe Lita::Handlers::Puppet, lita_handler: true do
   end
 
   describe('#cert_clean') do
-    before do
-      # Stub out the SSH action via Rye::Box overrides
-      allow_any_instance_of(Rye::Box).to receive(:cd).with('/tmp').and_return(true)
-      allow_any_instance_of(Rye::Box).to receive(:execute).and_return(base_rye_output)
-    end
-
     it 'should clean a cert' do
-      send_command('puppet cert clean server.name', as: @user)
+      allow(Rye::Box).to receive(:new).and_return(rye_box)
+      send_command('puppet cert clean server.name', as: lita_user)
       expect(replies[-2]).to eq('your `puppet cert clean` is all done!')
     end
   end
 
   describe('#puppet_agent_run') do
-    before do
-      # Stub out the SSH action via Rye::Box overrides
-      allow_any_instance_of(Rye::Box).to receive(:cd).with('/tmp').and_return(true)
-      allow_any_instance_of(Rye::Box).to receive(:execute).and_return(base_rye_output)
-    end
-
     it 'should run a puppet agent' do
-      send_command('puppet agent run on server.name', as: @user)
+      allow(Rye::Box).to receive(:new).and_return(rye_box)
+      send_command('puppet agent run on server.name', as: lita_user)
       expect(replies[-2]).to eq('that puppet run is complete! It exited with status 0.')
     end
   end
@@ -72,18 +73,45 @@ describe Lita::Handlers::Puppet, lita_handler: true do
           ]
         }
       )
-      send_command('puppet catalog foo profiles', as: @user)
+      send_command('puppet catalog foo profiles', as: lita_user)
       expect(replies.last).to eq("/code profile::foo\nrole::baz")
     end
   end
 
   describe('#nodes_with_class') do
-    before do
-      allow_any_instance_of(::PuppetDB::Client).to receive(:request).and_return(puppetdb_nodes)
-    end
-    it 'should provide a list of nodes containing a class in their catalog' do
-      send_command('puppet class nodes profile::foo', as: @user)
+    it 'should provide a list of nodes containing a class' do
+      allow(::PuppetDB::Client).to receive(:new).and_return(new_puppetdb_request_only)
+      send_command('puppet class nodes profile::foo', as: lita_user)
       expect(replies.last).to eq("/code server1.foo\nserver2.foo")
+    end
+  end
+
+  describe('#r10k_deploy') do
+    it 'should trigger a git pull on the puppet master' do
+      allow(Rye::Box).to receive(:new).and_return(rye_box)
+      send_command('puppet deploy production', as: lita_user)
+      expect(replies.last.split("\n").first).to eq('/code Already up-to-date.')
+    end
+    context 'without a module or environment' do
+      it 'should trigger r10k on the puppet master' do
+        allow(Rye::Box).to receive(:new).and_return(rye_box)
+        send_command('puppet deploy', as: lita_user)
+        expect(replies[-2]).to eq('your r10k deployment is done!')
+      end
+    end
+    context 'with an environment and no module' do
+      it 'should trigger r10k on the puppet master' do
+        allow(Rye::Box).to receive(:new).and_return(rye_box)
+        send_command('puppet deploy production', as: lita_user)
+        expect(replies[-2]).to eq('your r10k deployment is done!')
+      end
+    end
+    context 'with an environment and a module' do
+      it 'should trigger r10k on the puppet master' do
+        allow(Rye::Box).to receive(:new).and_return(rye_box)
+        send_command('puppet deploy production role', as: lita_user)
+        expect(replies[-2]).to eq('your r10k deployment is done!')
+      end
     end
   end
 end
