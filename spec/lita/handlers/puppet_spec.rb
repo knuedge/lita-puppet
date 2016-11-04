@@ -62,11 +62,26 @@ describe Lita::Handlers::Puppet, lita_handler: true do
     end
   end
 
+  describe('#node_profiles') do
+    it 'should provide a list of profiles and roles associated with a node' do
+      allow(::PuppetDB::Client).to receive(:get).and_return(
+        'data' => {
+          'resources' => [
+            { 'tags' => ['profile::foo'] },
+            { 'tags' => ['role::baz'] }
+          ]
+        }
+      )
+      send_command('puppet catalog foo profiles', as: @user)
+      expect(replies.last).to eq("/code profile::foo\nrole::baz")
+    end
+  end
+
   describe('#nodes_with_class') do
     before do
       allow_any_instance_of(::PuppetDB::Client).to receive(:request).and_return(puppetdb_nodes)
     end
-    it 'should provide a lost of nodes containing a class in their catalog' do
+    it 'should provide a list of nodes containing a class in their catalog' do
       send_command('puppet class nodes profile::foo', as: @user)
       expect(replies.last).to eq("/code server1.foo\nserver2.foo")
     end
