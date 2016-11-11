@@ -1,3 +1,4 @@
+# rubocop:disable Metrics/BlockLength
 Gem::Specification.new do |spec|
   spec.name          = 'lita-puppet'
   spec.version       = '0.7.0'
