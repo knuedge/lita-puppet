@@ -22,7 +22,7 @@ module Lita
       )
 
       route(
-        /(puppet|pp)\s+(catalog|node)\s+(\S+)\s+(profiles)/i,
+        /(puppet|pp)\s+(profiles|roles\sand\sprofiles|roles|r&p)\s+(\S+)/i,
         :node_profiles,
         command: true,
         help: { t('help.node_profiles.syntax') => t('help.node_profiles.desc') }
@@ -85,6 +85,7 @@ module Lita
 
       def node_profiles(response)
         host = response.matches[0][2]
+        what = response.matches[0][1]
         url  = config.puppetdb_url
 
         unless url
@@ -94,7 +95,7 @@ module Lita
 
         response.reply_with_mention(t('replies.node_profiles.working'))
 
-        profiles = node_roles_and_profiles(url, host)
+        profiles = node_roles_and_profiles(url, what, host)
 
         if profiles.is_a? String
           fail_message response, t('replies.node_profiles.failure', error: profiles)

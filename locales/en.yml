@@ -10,7 +10,7 @@ en:
             syntax: puppet cert clean <host>
             desc: Remove all traces of the SSL cert for <host> on the Puppet Master.
           node_profiles:
-            syntax: puppet catalog <host> profiles
+            syntax: puppet profiles | roles | roles and profiles <host>
             desc: Query PuppetDB to get a list of all roles and profiles applied to <host>.
           nodes_with_class:
             syntax: puppet class nodes <class>

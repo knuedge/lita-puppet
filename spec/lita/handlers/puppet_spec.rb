@@ -42,7 +42,7 @@ describe Lita::Handlers::Puppet, lita_handler: true do
   it 'should have the required routes' do
     is_expected.to route_command('puppet agent run on foo').to(:puppet_agent_run)
     is_expected.to route_command('puppet cert clean foo').to(:cert_clean)
-    is_expected.to route_command('puppet catalog foo profiles').to(:node_profiles)
+    is_expected.to route_command('puppet profiles foo').to(:node_profiles)
     is_expected.to route_command('puppet class nodes foo').to(:nodes_with_class)
     is_expected.to route_command('puppet r10k').to(:r10k_deploy)
   end
@@ -73,7 +73,7 @@ describe Lita::Handlers::Puppet, lita_handler: true do
           ]
         }
       )
-      send_command('puppet catalog foo profiles', as: lita_user)
+      send_command('puppet roles and profiles foo', as: lita_user)
       expect(replies.last).to eq("/code profile::foo\nrole::baz")
     end
   end
