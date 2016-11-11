@@ -101,7 +101,7 @@ module Lita
         else
           success_message(
             response,
-            t('replies.node_profiles.success', host: host),
+            t('replies.node_profiles.success', things: what, host: host),
             profiles.join("\n")
           )
         end
