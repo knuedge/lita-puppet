@@ -31,13 +31,10 @@ describe Lita::Handlers::Puppet, lita_handler: true do
       execute: rye_output_base
     )
     allow(box).to receive(:cd).with('/tmp').and_return(true)
-    allow(box).to receive(:[]).with('/opt/puppet/control').and_return(rye_box_git_only)
     box
   end
 
-  let(:rye_box_git_only) { instance_double('Rye::Box', git: rye_output_git) }
   let(:rye_output_base) { double(exit_status: 0, stdout: ['foo'], stderr: ['bar']) }
-  let(:rye_output_git) { double(exit_status: 0, stdout: ['Already up-to-date.'], stderr: []) }
 
   it 'should have the required routes' do
     is_expected.to route_command('puppet agent run on foo').to(:puppet_agent_run)
@@ -87,11 +84,6 @@ describe Lita::Handlers::Puppet, lita_handler: true do
   end
 
   describe('#r10k_deploy') do
-    it 'should trigger a git pull on the puppet master' do
-      allow(Rye::Box).to receive(:new).and_return(rye_box)
-      send_command('puppet deploy production', as: lita_user)
-      expect(replies.last.split("\n").first).to eq('/code Already up-to-date.')
-    end
     context 'without a module or environment' do
       it 'should trigger r10k on the puppet master' do
         allow(Rye::Box).to receive(:new).and_return(rye_box)
