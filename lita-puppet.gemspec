@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = 'lita-puppet'
-  spec.version       = '0.6.3'
+  spec.version       = '0.7.0'
   spec.authors       = ['Daniel Schaaff', 'Jonathan Gnagy'].sort
   spec.email         = ['jgnagy@knuedge.com']
   spec.description   = 'Some basic Puppet interactions for Lita'
@@ -28,4 +28,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'simplecov'
   spec.add_development_dependency 'coveralls'
   spec.add_development_dependency 'rubocop'
+  spec.add_development_dependency 'travis', '~> 1.8'
 end

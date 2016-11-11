@@ -15,9 +15,13 @@ Add lita-puppet to your Lita instance's Gemfile:
 gem "lita-puppet"
 ```
 
+## Prerequisites
+
+* Some of the commands require a [PuppetDB](https://docs.puppet.com/puppetdb/) server, and it must be specified in the configuration.
+* Other commands require that Lita has SSH access to machines using an SSH key, and that Lita has Passwordless `sudo` capabilities. This sounds scary, but it can be done in a very restrictive way (and if you're using puppet, you can automate it).
+
 ## Configuration
 
-* `config.handlers.puppet.control_repo_path` - Path for `git pull` during r10k deployments
 * `config.handlers.puppet.master_hostname` - Puppet Master's hostname
 * `config.handlers.puppet.puppetdb_url` - PuppetDB hostname (for the [puppetdb-ruby](https://github.com/voxpupuli/puppetdb-ruby) gem)
 * `config.handlers.puppet.ssh_user` - SSH user for the Puppet Master for r10k deployments
@@ -56,15 +60,19 @@ This is also available as:
 **Note** though that this doesn't do anything on the client side. If you want puppet to work on the `<host>` machine you'll need to generate a new cert. Usually you run this if you're planning to do that anyway though.
 
 #### Query PuppetDB for the Roles and Profiles used by a node
-    puppet catalog <certname> profiles
+    puppet roles and profiles <certname>
 
 This is also available as:
 
-    puppet node <certname> profiles
-    pp catalog <certname> profiles
-    pp node <certname> profiles
+    puppet r&p <certname>
+    puppet profiles <certname>
+    puppet roles <certname>
+    pp roles and profiles <certname>
+    pp r&p <certname>
+    pp profiles <certname>
+    pp roles <certname>
 
-Where `<certname>` is the SSL certificate name used for Puppet. This is usually the FQDN for the host. This query assumes you use the roles and profiles paradigm with the classes namespaced as `profile::example` and `role::example` etc..
+Where `<certname>` is the SSL certificate name used for Puppet. This is usually the FQDN for the host. This query assumes you use the roles and profiles paradigm with the classes namespaced as `profile::example` and `role::example` etc.. Using only `roles` or `profiles` in the command will only return the requested information.
 
 #### Query PuppetDB for the nodes associated with a class
     puppet class nodes <class>

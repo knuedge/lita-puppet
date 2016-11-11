@@ -4,7 +4,6 @@ module Lita
       namespace 'Puppet'
       config :master_hostname, required: true, type: String
       config :ssh_user, required: false, type: String, default: 'lita'
-      config :control_repo_path, required: false, type: String, default: '/opt/puppet/control'
       config :puppetdb_url, required: false, type: String
 
       route(

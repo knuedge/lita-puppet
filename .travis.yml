@@ -1,7 +1,15 @@
 language: ruby
 rvm:
-  - 2.2.5
-  - 2.3.1
+- 2.2.5
+- 2.3.1
 services:
-  - redis-server
+- redis-server
 cache: bundler
+deploy:
+  provider: rubygems
+  api_key:
+    secure: P5+R7mfECVqonuJQf4pHuzh71ihjH/PGJjAHbbfobxJf8krk8h8erD6c/86dxy/+Jyr/BDOvx2TH2Q1zn2lRo1unbKUsccP8nJfY4B8zkISqHs2JqkE2DZZqciYx7OIMO02Yyk3XS8FjaykHOCdgP1UpGY1i1ErfZkSkj3PcfybMLmgShZn/DrR15mulp4EHVtlsb7CZz4dIxsmnH+UP4bTirk1dcw1133iG5xx7hbQ03cMJI8Mjz51+edCI65dS6LN9Vyh2EKZfr+P/mRcp2gLcuHg0IjGvjv4/McMrkAxozTvvFdeSDoZda7sSdC1v0UwbjqHQMva9bcyjz9poKeQDRFjqRtoiuq1LIp4y26hzuOKZWjqnrXLKXRj50cLASiCL4enxr0xC9AkO23Il/MsExhu52Ke0bnS8DC3FkEcWsaVEYHoKC9w9dyMu4d5SCPX1tpbMNFjYacE9RGsKJFshCyi4SBVAu6MPy0X2tNO7bLBZTPAQSILult0D6s4H0j3laxLMZ2KSJpZWAEmsub5BjsheDgHTHZkQ0hAGP4lknqXiiU0F1ogP8LXagHqSLb0Bp+meb9BBhoe3mYafb5MB/r3SMdnOgjpbNxlkxeOwtNpW6PSHJJns1NzDG21PzaIq9MCfHjbDWHtk8n52KAVhSAg9QJ6xXIPSJyo3BYw=
+  gem: lita-puppet
+  on:
+    tags: true
+    repo: knuedge/lita-puppet
