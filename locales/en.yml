@@ -39,6 +39,5 @@ en:
             success: "Here are all the nodes with class %{pclass}:"
           r10k_deploy:
             working: "I'll get right on that. Give me a moment and I'll let you know how it went."
-            gitfail: "your r10k run didn't seem to work. Looks like there was a problem with Git:"
-            pupfail: "your r10k run didn't seem to work. Here's what went wrong:"
+            failure: "your r10k run didn't seem to work. Here's what went wrong:"
             success: "your r10k deployment is done!"

@@ -139,22 +139,15 @@ module Lita
 
         response.reply_with_mention(t('replies.r10k_deploy.working'))
 
-        result1 = r10k_git_result(config.master_hostname, user, config.control_repo_path)
+        result = simple_ssh_command(config.master_hostname, user, r10k_command(environment, mod))
 
-        if result1[:exception]
-          fail_message response, t('replies.r10k_deploy.gitfail'), result1[:exception].message
-          return false
-        end
-
-        result2 = simple_ssh_command(config.master_hostname, user, r10k_command(environment, mod))
-
-        if result2[:exception]
-          fail_message response, t('replies.r10k_deploy.pupfail'), result2[:exception].message
+        if result[:exception]
+          fail_message response, t('replies.r10k_deploy.failure'), result[:exception].message
         else
           success_message(
             response,
             t('replies.r10k_deploy.success'),
-            [result1[:stdout].join("\n"), result2[:stderr].join("\n")].join("\n")
+            [result[:stdout].join("\n"), result[:stderr].join("\n")].join("\n")
           )
         end
       end
@@ -171,14 +164,6 @@ module Lita
       def cert_clean_result(host, user, cert)
         cmd = "puppet cert clean #{cert} 2>&1"
         simple_ssh_command(host, user, cmd, 120)
-      end
-
-      def r10k_git_result(host, user, repo_location)
-        over_ssh(host: host, user: user, timeout: 120) do |server|
-          # Need to use sudo
-          server.enable_sudo
-          server[repo_location].git :pull
-        end
       end
 
       Lita.register_handler(self)
