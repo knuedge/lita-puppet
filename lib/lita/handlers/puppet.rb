@@ -5,6 +5,10 @@ module Lita
       config :master_hostname, required: true, type: String
       config :ssh_user, required: false, type: String, default: 'lita'
       config :puppetdb_url, required: false, type: String
+      config :puppetdb_api_vers, required: false, type: String, default: '4'
+      config :puppetdb_key, required: true, type: String
+      config :puppetdb_cert, required: true, type: String
+      config :puppetdb_ca_cert, required: true, type: String
 
       route(
         /(puppet|pp)(\s+agent)?\s+(run)(\s+on)?\s+(\S+)/i,
