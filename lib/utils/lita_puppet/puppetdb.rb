@@ -3,7 +3,14 @@ module Utils
     # Utility methods for working with PuppetDB
     module PuppetDB
       def class_nodes(url, classname)
-        client = ::PuppetDB::Client.new(server: url)
+        client = ::PuppetDB::Client.new({
+                                          server: url,
+                                          pem: {
+                                            'key' => config.puppetdb_key,
+                                            'cert'    => config.puppetdb_cert,
+                                            'ca_file' => config.puppetdb_ca_cert
+                                          }
+                                        }, config.puppetdb_api_vers)
         q = client.request(
           'resources',
           [
@@ -16,9 +23,17 @@ module Utils
         q.data.map { |node| node['certname'] }
       end
 
+      # rubocop:disable AbcSize
       def node_roles_and_profiles(url, what, nodename)
         # TODO: validate url and nodename
-        ::PuppetDB::Client.new(server: url) # this is weird but required
+        ::PuppetDB::Client.new({
+                                 server: url,
+                                 pem: {
+                                   'key' => config.puppetdb_key,
+                                   'cert'    => config.puppetdb_cert,
+                                   'ca_file' => config.puppetdb_ca_cert
+                                 }
+                               }, config.puppetdb_api_vers) # this is weird but required
         d = ::PuppetDB::Client.get("/catalogs/#{nodename}")
         return d['error'] if d['error']
 

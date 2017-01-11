@@ -4,7 +4,10 @@ require 'pry'
 describe Lita::Handlers::Puppet, lita_handler: true do
   before do
     registry.config.handlers.puppet.master_hostname = 'puppet.foo'
-    registry.config.handlers.puppet.puppetdb_url = 'http://pboard.foo:8080'
+    registry.config.handlers.puppet.puppetdb_url = 'https://pboard.foo:8081'
+    registry.config.handlers.puppet.puppetdb_key = 'keyfile'
+    registry.config.handlers.puppet.puppetdb_cert = 'certfile'
+    registry.config.handlers.puppet.puppetdb_ca_cert = 'cafile'
   end
 
   let(:lita_user) { Lita::User.create('User', name: 'A User', mention_name: 'user') }
