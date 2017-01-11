@@ -66,8 +66,8 @@ describe Lita::Handlers::Puppet, lita_handler: true do
   describe('#node_profiles') do
     it 'should provide a list of profiles and roles associated with a node' do
       allow(::PuppetDB::Client).to receive(:get).and_return(
-        'data' => {
-          'resources' => [
+        'resources' => {
+          'data' => [
             { 'tags' => ['profile::foo'] },
             { 'tags' => ['role::baz'] }
           ]

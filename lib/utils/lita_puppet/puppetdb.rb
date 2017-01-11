@@ -38,7 +38,7 @@ module Utils
         return d['error'] if d['error']
 
         tags = []
-        d['data']['resources'].each { |r| tags.concat(r['tags']) }
+        d['resources']['data'].each { |r| tags.concat(r['tags']) }
 
         # return all the tags related to profile:: or role::
         case what
