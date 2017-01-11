@@ -24,7 +24,14 @@ gem "lita-puppet"
 
 * `config.handlers.puppet.master_hostname` - Puppet Master's hostname
 * `config.handlers.puppet.puppetdb_url` - PuppetDB hostname (for the [puppetdb-ruby](https://github.com/voxpupuli/puppetdb-ruby) gem)
+* `config.handlers.puppet.puppetdb_api_vers` - PuppetDB api version (for the [puppetdb-ruby](https://github.com/voxpupuli/puppetdb-ruby) gem)
+* `config.handlers.puppet.puppetdb_key` - key file for puppetdb ssl (for the [puppetdb-ruby](https://github.com/voxpupuli/puppetdb-ruby) gem)
+*  `config.handlers.puppet.puppetdb_cert` - cert file for puppetdb (for the [puppetdb-ruby](https://github.com/voxpupuli/puppetdb-ruby) gem)
+* `config.handlers.puppet.puppetdb_ca_cert` - ca file for puppetdb (for the [puppetdb-ruby](https://github.com/voxpupuli/puppetdb-ruby) gem)
 * `config.handlers.puppet.ssh_user` - SSH user for the Puppet Master for r10k deployments
+
+### PuppetDB APIv4
+If you are using this with version 4 of the PuppetDB api you append `/pdq/query` to the end of the PuppetDB server url. See [this issue for more info](https://github.com/voxpupuli/puppetdb-ruby/issues/13)
 
 ## Usage
 
