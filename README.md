@@ -19,6 +19,7 @@ gem "lita-puppet"
 
 * Some of the commands require a [PuppetDB](https://docs.puppet.com/puppetdb/) server, and it must be specified in the configuration.
 * Other commands require that Lita has SSH access to machines using an SSH key, and that Lita has Passwordless `sudo` capabilities. This sounds scary, but it can be done in a very restrictive way (and if you're using puppet, you can automate it).
+* Lita authorization groups are used to restrict certain commands
 
 ## Configuration
 
@@ -37,6 +38,7 @@ If you are using this with version 4 of the PuppetDB api you append `/pdq/query`
 
 #### Deploying an environment via r10k
     puppet r10k [environment [module]]
+This requires the user is a member of the `puppet_admins` authorization group.
 
 This is also available as:
 
@@ -44,8 +46,10 @@ This is also available as:
     pp deploy [environment [module]]
     pp r10k [environment [module]]
 
+
 #### Trigger a manual run of the Puppet agent on a host
     puppet agent run on <host>
+This requires the user is a member of the `puppet_admins` authorization group.
 
 This is also available as:
 
@@ -59,6 +63,7 @@ Though we don't recomend that last one...
 
 #### Remove an SSL cert from the Puppet Master
     puppet cert clean <host>
+This requires the user is a member of the `puppet_admins` authorization group.
 
 This is also available as:
 

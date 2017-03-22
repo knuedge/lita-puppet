@@ -40,14 +40,20 @@ describe Lita::Handlers::Puppet, lita_handler: true do
   let(:rye_output_base) { double(exit_status: 0, stdout: ['foo'], stderr: ['bar']) }
 
   it 'should have the required routes' do
-    is_expected.to route_command('puppet agent run on foo').to(:puppet_agent_run)
-    is_expected.to route_command('puppet cert clean foo').to(:cert_clean)
+    is_expected.to route_command('puppet agent run on foo')
+      .with_authorization_for(:puppet_admins).to(:puppet_agent_run)
+    is_expected.to route_command('puppet cert clean foo')
+      .with_authorization_for(:puppet_admins).to(:cert_clean)
     is_expected.to route_command('puppet profiles foo').to(:node_profiles)
     is_expected.to route_command('puppet class nodes foo').to(:nodes_with_class)
-    is_expected.to route_command('puppet r10k').to(:r10k_deploy)
+    is_expected.to route_command('puppet r10k')
+      .with_authorization_for(:puppet_admins).to(:r10k_deploy)
   end
 
   describe('#cert_clean') do
+    before do
+      robot.auth.add_user_to_group!(lita_user, :puppet_admins)
+    end
     it 'should clean a cert' do
       allow(Rye::Box).to receive(:new).and_return(rye_box)
       send_command('puppet cert clean server.name', as: lita_user)
@@ -56,6 +62,9 @@ describe Lita::Handlers::Puppet, lita_handler: true do
   end
 
   describe('#puppet_agent_run') do
+    before do
+      robot.auth.add_user_to_group!(lita_user, :puppet_admins)
+    end
     it 'should run a puppet agent' do
       allow(Rye::Box).to receive(:new).and_return(rye_box)
       send_command('puppet agent run on server.name', as: lita_user)
@@ -87,6 +96,9 @@ describe Lita::Handlers::Puppet, lita_handler: true do
   end
 
   describe('#r10k_deploy') do
+    before do
+      robot.auth.add_user_to_group!(lita_user, :puppet_admins)
+    end
     context 'without a module or environment' do
       it 'should trigger r10k on the puppet master' do
         allow(Rye::Box).to receive(:new).and_return(rye_box)
