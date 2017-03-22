@@ -17,3 +17,11 @@ Metrics/MethodLength:
 
 Metrics/ClassLength:
   Max: 150
+
+Metrics/BlockLength:
+  Max: 30
+  Exclude:
+    - '*.gemspec'
+    - Rakefile
+    - 'spec/**/*_spec.rb'
+    - 'spec/spec_helper.rb'
