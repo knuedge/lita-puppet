@@ -1,7 +1,7 @@
 # rubocop:disable Metrics/BlockLength
 Gem::Specification.new do |spec|
   spec.name          = 'lita-puppet'
-  spec.version       = '1.0.0'
+  spec.version       = '2.0.0'
   spec.authors       = ['Daniel Schaaff', 'Jonathan Gnagy'].sort
   spec.email         = ['jgnagy@knuedge.com']
   spec.description   = 'Some basic Puppet interactions for Lita'

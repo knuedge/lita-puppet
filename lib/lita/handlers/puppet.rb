@@ -14,6 +14,7 @@ module Lita
         /(puppet|pp)(\s+agent)?\s+(run)(\s+on)?\s+(\S+)/i,
         :puppet_agent_run,
         command: true,
+        restrict_to: :puppet_admins,
         help: { t('help.puppet_agent_run.syntax') => t('help.puppet_agent_run.desc') }
       )
 
@@ -21,6 +22,7 @@ module Lita
         /(puppet|pp)\s+(cert)\s+(clean)\s+(\S+)/i,
         :cert_clean,
         command: true,
+        restrict_to: :puppet_admins,
         help: { t('help.cert_clean.syntax') => t('help.cert_clean.desc') }
       )
 
@@ -42,6 +44,7 @@ module Lita
         /(puppet|pp)\s+(r10k|deploy)(\s+(\S+)(\s+(\S+))?)?/i,
         :r10k_deploy,
         command: true,
+        restrict_to: :puppet_admins,
         help: { t('help.r10k_deploy.syntax') => t('help.r10k_deploy.desc') }
       )
 
