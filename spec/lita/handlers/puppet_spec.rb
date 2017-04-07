@@ -48,6 +48,8 @@ describe Lita::Handlers::Puppet, lita_handler: true do
     is_expected.to route_command('puppet class nodes foo').to(:nodes_with_class)
     is_expected.to route_command('puppet r10k')
       .with_authorization_for(:puppet_admins).to(:r10k_deploy)
+    is_expected.to route_command('puppet fact node foo').to(:node_facts)
+    is_expected.to route_command('puppet node info').to(:nodes_info)
   end
 
   describe('#cert_clean') do

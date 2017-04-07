@@ -2,15 +2,19 @@ module Utils
   module LitaPuppet
     # Utility methods for working with PuppetDB
     module PuppetDB
-      def class_nodes(url, classname)
-        client = ::PuppetDB::Client.new({
-                                          server: url,
-                                          pem: {
-                                            'key' => config.puppetdb_key,
-                                            'cert'    => config.puppetdb_cert,
-                                            'ca_file' => config.puppetdb_ca_cert
-                                          }
-                                        }, config.puppetdb_api_vers)
+      def db_connect
+        ::PuppetDB::Client.new({
+                                 server: config.puppetdb_url,
+                                 pem: {
+                                   'key' => config.puppetdb_key,
+                                   'cert'    => config.puppetdb_cert,
+                                   'ca_file' => config.puppetdb_ca_cert
+                                 }
+                               }, config.puppetdb_api_vers)
+      end
+
+      def class_nodes(classname)
+        client = db_connect
         q = client.request(
           'resources',
           [
@@ -21,6 +25,33 @@ module Utils
         )
 
         q.data.map { |node| node['certname'] }
+      end
+
+      def query_fact(node, fact)
+        q = db_connect.request(
+          "facts/#{fact}",
+          [:'=', 'certname', node]
+        )
+        begin
+          raise 'invalid query' if q.data.empty?
+          q.data.empty? raise 'invalid query'
+          q.data.last['value']
+        rescue
+          nil
+        end
+      end
+
+      def node_info(node)
+        q = db_connect.request(
+          'nodes',
+          [:'=', 'certname', node]
+        )
+        begin
+          raise 'invalid node' if q.data.empty?
+          q.data.last.to_yaml
+        rescue
+          nil
+        end
       end
 
       # rubocop:disable AbcSize

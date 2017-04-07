@@ -41,6 +41,20 @@ module Lita
       )
 
       route(
+        /(puppet|pp)\s+(fact)\s+(\S+)\s+(\S+)/i,
+        :node_facts,
+        command: true,
+        help: { t('help.node_facts.syntax') => t('help.node_facts.desc') }
+      )
+
+      route(
+        /(puppet|pp)\s+(\S+)\s+(\S+)/i,
+        :nodes_info,
+        command: true,
+        help: { t('help.node_info.syntax') => t('help.node_info.desc') }
+      )
+
+      route(
         /(puppet|pp)\s+(r10k|deploy)(\s+(\S+)(\s+(\S+))?)?/i,
         :r10k_deploy,
         command: true,
@@ -134,6 +148,31 @@ module Lita
             t('replies.nodes_with_class.success', pclass: puppet_class),
             puppet_classes.join("\n")
           )
+        end
+      end
+
+      def node_facts(response)
+        host = response.matches[0][2]
+        fact = response.matches[0][3]
+        result = query_fact(host, fact)
+        if result.nil?
+          response.reply_with_mention(
+            t('replies.node_facts.error host: host')
+          )
+        else
+          response.reply result
+        end
+      end
+
+      def nodes_info(response)
+        host = response.matches[0][1]
+        result = node_info(host)
+        if result.nil?
+          response.reply_with_mention(
+            t('replies.nodes_info.error host: host')
+          )
+        else
+          response.result
         end
       end
 
