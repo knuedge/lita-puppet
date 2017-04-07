@@ -115,7 +115,7 @@ module Lita
 
         response.reply_with_mention(t('replies.node_profiles.working'))
 
-        profiles = node_roles_and_profiles(url, what, host)
+        profiles = node_roles_and_profiles(what, host)
 
         if profiles.is_a? String
           fail_message response, t('replies.node_profiles.failure', error: profiles)
@@ -132,14 +132,14 @@ module Lita
         puppet_class = response.matches[0][3]
         url = config.puppetdb_url
 
-        unless url
-          response.reply(t('replies.nodes_with_class.notconf'))
-          return false
-        end
+        #unless url
+        #  response.reply(t('replies.nodes_with_class.notconf'))
+        #  return false
+        #end
 
         response.reply_with_mention(t('replies.nodes_with_class.working'))
 
-        puppet_classes = class_nodes(url, class_camel(puppet_class))
+        puppet_classes = class_nodes(class_camel(puppet_class))
         if puppet_classes.empty?
           fail_message response, t('replies.nodes_with_class.failure', pclass: puppet_class)
         else

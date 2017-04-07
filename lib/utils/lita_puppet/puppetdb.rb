@@ -14,8 +14,7 @@ module Utils
       end
 
       def class_nodes(classname)
-        client = db_connect
-        q = client.request(
+        q = db_connect.request(
           'resources',
           [
             :and,
@@ -55,10 +54,10 @@ module Utils
       end
 
       # rubocop:disable AbcSize
-      def node_roles_and_profiles(url, what, nodename)
+      def node_roles_and_profiles(what, nodename)
         # TODO: validate url and nodename
         ::PuppetDB::Client.new({
-                                 server: url,
+                                 server: config.puppetdb_url,
                                  pem: {
                                    'key' => config.puppetdb_key,
                                    'cert'    => config.puppetdb_cert,
