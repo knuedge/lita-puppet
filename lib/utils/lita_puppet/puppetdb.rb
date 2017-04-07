@@ -33,7 +33,6 @@ module Utils
         )
         begin
           raise 'invalid query' if q.data.empty?
-          q.data.empty? raise 'invalid query'
           q.data.last['value']
         rescue
           nil

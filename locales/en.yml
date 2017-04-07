@@ -19,7 +19,7 @@ en:
             syntax: puppet fact <certname> <factname>
             desc: Query PuppetDB for facts of a given node
           nodes_info:
-            syntax: puppet <certname> node_info
+            syntax: puppet <certname> info
             desc: returns basic info about a node from puppetdb
           r10k_deploy:
             syntax: puppet r10k [env [module]]

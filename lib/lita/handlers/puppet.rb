@@ -48,10 +48,10 @@ module Lita
       )
 
       route(
-        /(puppet|pp)\s+(\S+)\s+(\S+)/i,
+        /(puppet|pp)\s+(\S+)\s+(info)/i,
         :nodes_info,
         command: true,
-        help: { t('help.node_info.syntax') => t('help.node_info.desc') }
+        help: { t('help.nodes_info.syntax') => t('help.nodes_info.desc') }
       )
 
       route(
@@ -107,11 +107,6 @@ module Lita
         host = response.matches[0][2]
         what = response.matches[0][1]
 
-        #unless url
-        #  response.reply(t('replies.node_profiles.notconf'))
-        #  return false
-        #end
-
         response.reply_with_mention(t('replies.node_profiles.working'))
 
         profiles = node_roles_and_profiles(what, host)
@@ -129,11 +124,6 @@ module Lita
 
       def nodes_with_class(response)
         puppet_class = response.matches[0][3]
-
-        #unless url
-        #  response.reply(t('replies.nodes_with_class.notconf'))
-        #  return false
-        #end
 
         response.reply_with_mention(t('replies.nodes_with_class.working'))
 
@@ -155,7 +145,7 @@ module Lita
         result = query_fact(host, fact)
         if result.nil?
           response.reply_with_mention(
-            t('replies.node_facts.error host: host')
+            t('replies.node_facts.error', host: host)
           )
         else
           response.reply result
@@ -167,10 +157,10 @@ module Lita
         result = node_info(host)
         if result.nil?
           response.reply_with_mention(
-            t('replies.nodes_info.error host: host')
+            t('replies.nodes_info.error', host: host)
           )
         else
-          response.result
+          response.reply result
         end
       end
 
