@@ -106,12 +106,11 @@ module Lita
       def node_profiles(response)
         host = response.matches[0][2]
         what = response.matches[0][1]
-        url  = config.puppetdb_url
 
-        unless url
-          response.reply(t('replies.node_profiles.notconf'))
-          return false
-        end
+        #unless url
+        #  response.reply(t('replies.node_profiles.notconf'))
+        #  return false
+        #end
 
         response.reply_with_mention(t('replies.node_profiles.working'))
 
@@ -130,7 +129,6 @@ module Lita
 
       def nodes_with_class(response)
         puppet_class = response.matches[0][3]
-        url = config.puppetdb_url
 
         #unless url
         #  response.reply(t('replies.nodes_with_class.notconf'))
