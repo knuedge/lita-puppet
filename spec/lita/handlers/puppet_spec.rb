@@ -16,11 +16,52 @@ describe Lita::Handlers::Puppet, lita_handler: true do
     instance_double('::PuppetDB::Client', request: puppetdb_nodes)
   end
 
+  let(:fact_request) do
+    instance_double('::PuppetDB::Client', request: puppetdb_fact_result)
+  end
+
+  let(:info_request) do
+    instance_double('::PuppetDB::Client', request: puppetdb_host_info)
+  end
+
+  let(:bad_request) do
+    instance_double('::PuppetDB::Client', request: puppetdb_nil_data)
+  end
+
   let(:puppetdb_nodes) do
     double(
       data: [
         { 'certname' => 'server1.foo' },
         { 'certname' => 'server2.foo' }
+      ]
+    )
+  end
+
+  let(:puppetdb_nil_data) do
+    double(
+      data: [
+      ]
+    )
+  end
+  let(:puppetdb_host_info) do
+    double(
+      data: [
+        { 'deactivated' => nil,
+          'latest_report_hash' => '693feed',
+          'facts_environment' => 'production' }
+      ]
+    )
+  end
+
+  let(:puppetdb_fact_result) do
+    double(
+      data: [
+        {
+          'certname' => 'foo.example.com',
+          'name' => 'operatingsystem',
+          'value' => 'Darwin',
+          'environment' => 'production'
+        }
       ]
     )
   end
@@ -48,6 +89,8 @@ describe Lita::Handlers::Puppet, lita_handler: true do
     is_expected.to route_command('puppet class nodes foo').to(:nodes_with_class)
     is_expected.to route_command('puppet r10k')
       .with_authorization_for(:puppet_admins).to(:r10k_deploy)
+    is_expected.to route_command('puppet fact node foo').to(:node_facts)
+    is_expected.to route_command('puppet node info').to(:nodes_info)
   end
 
   describe('#cert_clean') do
@@ -92,6 +135,35 @@ describe Lita::Handlers::Puppet, lita_handler: true do
       allow(::PuppetDB::Client).to receive(:new).and_return(new_puppetdb_request_only)
       send_command('puppet class nodes profile::foo', as: lita_user)
       expect(replies.last).to eq("/code server1.foo\nserver2.foo")
+    end
+  end
+
+  describe('#node_facts') do
+    it 'should return error msg for invalid certname' do
+      allow(::PuppetDB::Client).to receive(:new).and_return(bad_request)
+      send_command('puppet fact foo.example.com operatingsystem')
+      expect(replies.last)
+        .to eq("that didn't work, are you sure foo.example.com is a valid certname?")
+    end
+    it 'should return error msg for invalid certname' do
+      allow(::PuppetDB::Client).to receive(:new).and_return(fact_request)
+      send_command('puppet fact foo.example.com operatingsystem')
+      expect(replies.last).to eq('Darwin')
+    end
+  end
+
+  describe('#nodes_info') do
+    it 'should return error msg for invalid certname' do
+      allow(::PuppetDB::Client).to receive(:new).and_return(bad_request)
+      send_command('puppet foo.example.com info')
+      expect(replies.last)
+        .to eq("that didn't work, are you sure foo.example.com is a valid certname?")
+    end
+    it 'should return the node info' do
+      allow(::PuppetDB::Client).to receive(:new).and_return(info_request)
+      send_command('puppet foo.example.com info')
+      expect(replies.last)
+        .to eq("---\ndeactivated: \nlatest_report_hash: 693feed\nfacts_environment: production\n")
     end
   end
 

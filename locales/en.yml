@@ -15,6 +15,12 @@ en:
           nodes_with_class:
             syntax: puppet class nodes <class>
             desc: Query PuppetDB to get a list of all nodes containing a class.
+          node_facts:
+            syntax: puppet fact <certname> <factname>
+            desc: Query PuppetDB for facts of a given node
+          nodes_info:
+            syntax: puppet <certname> info
+            desc: returns basic info about a node from puppetdb
           r10k_deploy:
             syntax: puppet r10k [env [module]]
             desc: Deploy the latest puppet code on the puppet master via r10k, optionally specifying an environment, and possibly a module.
@@ -37,6 +43,10 @@ en:
             working: "let me see what I can find in PuppetDB for you."
             failure: "There are no nodes with %{pclass} class, are you sure it's a valid class?"
             success: "Here are all the nodes with class %{pclass}:"
+          node_facts:
+            error: "that didn't work, are you sure %{host} is a valid certname?"
+          nodes_info:
+            error: "that didn't work, are you sure %{host} is a valid certname?"
           r10k_deploy:
             working: "I'll get right on that. Give me a moment and I'll let you know how it went."
             failure: "your r10k run didn't seem to work. Here's what went wrong:"

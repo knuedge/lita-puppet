@@ -94,3 +94,19 @@ This is also available as:
     pp class nodes <class>
 
 Where `<class>` is a class name as it shows up in the catalog. Usually something like Role::Foo_bar
+
+#### Query PuppetDB for the fact value of a given node
+`puppet fact <certname> <fact>`
+
+This is also available as:
+
+`pp fact <certname> <fact>`
+
+#### Query PuppetDB for some basic info about a node
+`puppet <certname> info`
+
+This is also available as:
+
+`pp <certname> info`
+
+This queries the [PuppetDB nodes endpoint](https://docs.puppet.com/puppetdb/4.4/api/query/v4/nodes.html) 
