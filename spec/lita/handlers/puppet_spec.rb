@@ -128,6 +128,18 @@ describe Lita::Handlers::Puppet, lita_handler: true do
       send_command('puppet roles and profiles foo', as: lita_user)
       expect(replies.last).to eq("/code profile::foo\nrole::baz")
     end
+    it 'should return error for no profile or role tags' do
+      allow(::PuppetDB::Client).to receive(:get).and_return(
+        'resources' => {
+          'data' => [
+            { 'tags' => ['baz::foo'] },
+            { 'tags' => ['bar::baz'] }
+          ]
+        }
+      )
+      send_command('puppet roles and profiles foo', as: lita_user)
+      expect(replies.last).to eq("The catalog did not contain any roles or profiles for 'foo'")
+    end
   end
 
   describe('#nodes_with_class') do
