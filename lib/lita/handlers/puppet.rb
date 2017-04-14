@@ -113,6 +113,8 @@ module Lita
 
         if profiles.is_a? String
           fail_message response, t('replies.node_profiles.failure', error: profiles)
+        elsif profiles == []
+          fail_message response, t('replies.node_profiles.failure_no_roles', host: host)
         else
           success_message(
             response,

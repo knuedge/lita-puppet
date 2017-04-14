@@ -37,6 +37,7 @@ en:
             notconf: "I would do that, but I don't know how to connect to PuppetDB. Edit my config and add `config.handlers.puppet.puppetdb_url`."
             working: "let me see what I can find in PuppetDB for you."
             failure: "Hmmm, that didn't work. Here's what PuppetDB responded with: '%{error}'"
+            failure_no_roles: "The catalog did not contain any roles or profiles for '%{host}'"
             success: "Here are the %{things} for %{host}:"
           nodes_with_class:
             notconf: "I would do that, but I don't know how to connect to PuppetDB. Edit my config and add `config.handlers.puppet.puppetdb_url`."
