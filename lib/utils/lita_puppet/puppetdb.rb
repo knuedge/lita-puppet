@@ -70,7 +70,7 @@ module Utils
         if d['resources'].is_a?(Array)
           d['resources'].each { |r| tag.concat(r['tags']) }
         else
-          d['resources']['data'].each { |r| tags.concat(r['tags']) }
+          d['resources']['data'].each { |r| tag.concat(r['tags']) }
         end
 
         # return all the tags related to profile:: or role::
