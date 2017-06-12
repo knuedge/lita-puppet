@@ -52,7 +52,7 @@ module Utils
         end
       end
 
-      # rubocop:disable AbcSize, MethodLength
+      # rubocop:disable AbcSize
       def node_roles_and_profiles(what, nodename)
         # TODO: validate url and nodename
         ::PuppetDB::Client.new({
