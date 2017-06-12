@@ -41,6 +41,7 @@ module Utils
           remote.disconnect
         end
 
+        remote = nil # Try to force the destruction of the Rye box
         calculate_result(output, exception)
       end
 
