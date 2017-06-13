@@ -35,7 +35,11 @@ module Utils
       # Strip off bad characters
       def sanitze_for_chat(text)
         # Remove bash colorings
-        text.gsub(/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]/, '')
+        o = text.gsub(/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]/, '')
+        # Limit text to 50 lines
+        o = (o.lines.to_a[0...49] << "\n... truncated to 50 lines").join if o.lines.size > 50
+        # return the output
+        o
       end
     end
   end

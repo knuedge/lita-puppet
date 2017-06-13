@@ -35,13 +35,12 @@ module Utils
         output = begin
           # pass our host back to the user to work with
           Timeout.timeout(opts[:timeout]) { yield remote }
-        rescue Rye::Err, StandardError => e
+        rescue Rye::Err, Timeout::Error => e
           exception = e
         ensure
           remote.disconnect
         end
 
-        remote = nil # Try to force the destruction of the Rye box
         calculate_result(output, exception)
       end
 

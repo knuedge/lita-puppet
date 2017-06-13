@@ -105,6 +105,10 @@ describe Lita::Handlers::Puppet, lita_handler: true do
   end
 
   describe('#puppet_agent_run') do
+    let(:rye_output_base) do
+      double(exit_status: 0, stdout: (0..99).to_a, stderr: ['bar'])
+    end
+
     before do
       robot.auth.add_user_to_group!(lita_user, :puppet_admins)
     end
@@ -112,6 +116,13 @@ describe Lita::Handlers::Puppet, lita_handler: true do
       allow(Rye::Box).to receive(:new).and_return(rye_box)
       send_command('puppet agent run on server.name', as: lita_user)
       expect(replies[-2]).to eq('that puppet run is complete! It exited with status 0.')
+    end
+
+    it 'should truncate long results' do
+      allow(Rye::Box).to receive(:new).and_return(rye_box)
+      send_command('puppet agent run on server.name', as: lita_user)
+      expect(replies[-1].lines.last).to eq('... truncated to 50 lines')
+      expect(replies[-1].lines.size).to eq(51)
     end
   end
 
