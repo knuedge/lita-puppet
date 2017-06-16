@@ -1,6 +1,7 @@
 require 'lita'
 require 'rye'
 require 'timeout'
+require 'resolv'
 require 'puppetdb'
 
 Lita.load_locales Dir[File.expand_path(

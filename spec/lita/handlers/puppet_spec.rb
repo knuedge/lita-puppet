@@ -112,15 +112,22 @@ describe Lita::Handlers::Puppet, lita_handler: true do
     before do
       robot.auth.add_user_to_group!(lita_user, :puppet_admins)
     end
-    it 'should run a puppet agent' do
+
+    it 'notifies users when server names are not resolvable' do
       allow(Rye::Box).to receive(:new).and_return(rye_box)
       send_command('puppet agent run on server.name', as: lita_user)
+      expect(replies[-1]).to eq('I couldn\'t find a machine called \'server.name\'.')
+    end
+
+    it 'should run a puppet agent' do
+      allow(Rye::Box).to receive(:new).and_return(rye_box)
+      send_command('puppet agent run on localhost', as: lita_user)
       expect(replies[-2]).to eq('that puppet run is complete! It exited with status 0.')
     end
 
     it 'should truncate long results' do
       allow(Rye::Box).to receive(:new).and_return(rye_box)
-      send_command('puppet agent run on server.name', as: lita_user)
+      send_command('puppet agent run on localhost', as: lita_user)
       expect(replies[-1].lines.last).to eq('... truncated to 50 lines')
       expect(replies[-1].lines.size).to eq(51)
     end
