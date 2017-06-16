@@ -87,8 +87,18 @@ module Lita
       def puppet_agent_run(response)
         host = response.matches[0][4]
 
-        response.reply_with_mention(t('replies.puppet_agent_run.working'))
+        resolvable = begin
+          Resolv.getaddress(host)
+        rescue Resolv::ResolvError
+          false
+        end
 
+        unless resolvable
+          response.reply_with_mention(t('replies.puppet_agent_run.dns_failure', machine: host))
+          return false
+        end
+
+        response.reply_with_mention(t('replies.puppet_agent_run.working'))
         result = simple_ssh_command(host, config.ssh_user, agent_command)
 
         # build a reply

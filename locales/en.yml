@@ -32,6 +32,7 @@ en:
           puppet_agent_run:
             working: "I'll run puppet right away. Give me a sec and I'll let you know how it goes."
             failure: "your puppet run is done, but didn't seem to work... I think it may have timed out."
+            dns_failure: "I couldn't find a machine called '%{machine}'."
             success: "that puppet run is complete! It exited with status %{status}."
           node_profiles:
             notconf: "I would do that, but I don't know how to connect to PuppetDB. Edit my config and add `config.handlers.puppet.puppetdb_url`."
